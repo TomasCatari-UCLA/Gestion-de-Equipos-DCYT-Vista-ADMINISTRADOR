@@ -1,4 +1,4 @@
-declare module "https://gtplus.net/forms2/dcytDb/api/Cl_dcytDb.php?v251202-1800" {
+declare module "https://gtplus.net/forms2/dcytDb/api/Cl_dcytDb.php" {
   class Cl_dcytDb {
     constructor({ aliasCuenta } = { aliasCuenta: "" }) {}
 
