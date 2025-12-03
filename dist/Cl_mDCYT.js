@@ -1,4 +1,4 @@
-import Cl_dcytDb from "https://gtplus.net/forms2/dcytDb/api/Cl_dcytDb.php";
+import Cl_dcytDb from "https://gtplus.net/forms2/dcytDb/api/Cl_dcytDb.php?v251110-2150";
 import Cl_mEquipo from "./Cl_mEquipo.js";
 export default class Cl_mDCYT {
     constructor() {
