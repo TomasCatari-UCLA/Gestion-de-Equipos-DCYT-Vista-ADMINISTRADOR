@@ -1,4 +1,4 @@
-import { LISTA_ESTADOS, LISTA_LABORATORIOS } from "./Cl_mEquipo.js";
+import { LISTA_ESTADOS, LISTA_LABORATORIOS, } from "./Cl_mEquipo.js";
 import Cl_vEquipo from "./Cl_vEquipo.js";
 import Cl_vGeneral, { tHTMLElement } from "./tools/Cl_vGeneral.js";
 import { opcionFicha } from "./tools/core.tools.js";
@@ -8,15 +8,20 @@ export default class Cl_vDCYT extends Cl_vGeneral {
         this.serialPendiente = null;
         this.vEquipo = new Cl_vEquipo();
         this.vEquipo.show({ ver: false });
-        this.btAgregar = this.crearHTMLButtonElement("btAgregar", { onclick: () => this.addEquipo(), });
-        this.btBuscar = this.crearHTMLButtonElement("btBuscar", { onclick: () => this.abrirBusqueda(), });
-        // Botón "*" (Quitar Filtro)
+        this.btAgregar = this.crearHTMLButtonElement("btAgregar", {
+            onclick: () => this.addEquipo(),
+        });
+        this.btBuscar = this.crearHTMLButtonElement("btBuscar", {
+            onclick: () => this.abrirBusqueda(),
+        });
         this.btQuitarFiltro = this.crearHTMLButtonElement("btQuitarFiltro", {
             onclick: () => this.limpiarFiltro(),
         });
-        // Le ponemos el texto del asterisco como pidió el profe
         this.btQuitarFiltro.innerText = "* Quitar Filtro";
-        this.divTabla = this.crearHTMLElement("divTabla", { type: tHTMLElement.CONTAINER, refresh: () => this.mostrarEquipos(), });
+        this.divTabla = this.crearHTMLElement("divTabla", {
+            type: tHTMLElement.CONTAINER,
+            refresh: () => this.mostrarEquipos(),
+        });
         this.lblTotal = document.getElementById("lblTotal");
         this.lblOperativos = document.getElementById("lblOperativos");
         this.lblReparacion = document.getElementById("lblReparacion");
@@ -26,45 +31,65 @@ export default class Cl_vDCYT extends Cl_vGeneral {
         this.btConfirmarSi.onclick = () => this.ejecutarBorrado();
         this.btConfirmarNo = document.getElementById("btConfirmarNo");
         this.btConfirmarNo.onclick = () => this.ocultarModalBorrado();
-        // --- CONECTAR NUEVOS INPUTS DE BÚSQUEDA ---
+        // --- CONEXIÓN BÚSQUEDA ---
         this.modalBuscar = document.getElementById("modalBuscar");
-        // OJO: Usamos getElementById porque son inputs sueltos en el modal
         this.inBusSerial = document.getElementById("bus_inSerial");
-        this.slBusLab = document.getElementById("bus_slLab");
         this.inBusCpu = document.getElementById("bus_inCpu");
         this.inBusRam = document.getElementById("bus_inRam");
-        this.slBusEstado = document.getElementById("bus_slEstado");
         this.inBusFila = document.getElementById("bus_inFila");
         this.inBusPuesto = document.getElementById("bus_inPuesto");
-        // Llenar selects de búsqueda
-        this.llenarSelectBusqueda(this.slBusLab, LISTA_LABORATORIOS);
-        this.llenarSelectBusqueda(this.slBusEstado, LISTA_ESTADOS);
+        // CAMBIO: Conectamos los DIVS contenedores de checkboxes en lugar de selects
+        this.divBusLab = document.getElementById("bus_divLab");
+        this.divBusEstado = document.getElementById("bus_divEstado");
+        // CAMBIO: Llenamos los checkboxes dinámicamente usando las listas importadas
+        this.llenarCheckboxes(this.divBusLab, LISTA_LABORATORIOS, "chk_lab");
+        this.llenarCheckboxes(this.divBusEstado, LISTA_ESTADOS, "chk_est");
         this.btBuscarCancelar = document.getElementById("btBuscarCancelar");
         this.btBuscarCancelar.onclick = () => this.ocultarBusqueda();
         this.btBuscarAceptar = document.getElementById("btBuscarAceptar");
         this.btBuscarAceptar.onclick = () => this.ejecutarBusqueda();
     }
-    set controlador(controlador) { super.controlador = controlador; this.vEquipo.controlador = controlador; }
-    get controlador() { return super.controlador; }
-    llenarSelectBusqueda(select, datos) {
-        select.innerHTML = '<option value="">(Todos)</option>'; // Opción vacía para no filtrar
-        datos.forEach(dato => {
-            let option = document.createElement("option");
-            option.value = dato;
-            option.text = dato;
-            select.add(option);
+    set controlador(controlador) {
+        super.controlador = controlador;
+        this.vEquipo.controlador = controlador;
+    }
+    get controlador() {
+        return super.controlador;
+    }
+    // --- NUEVO MÉTODO AUXILIAR PARA CREAR CHECKBOXES ---
+    llenarCheckboxes(container, datos, nameGroup) {
+        container.innerHTML = "";
+        datos.forEach((dato, index) => {
+            let wrapper = document.createElement("div");
+            wrapper.className = "checkbox-item";
+            let checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.value = dato;
+            checkbox.id = `${nameGroup}_${index}`;
+            checkbox.name = nameGroup;
+            let label = document.createElement("label");
+            label.htmlFor = `${nameGroup}_${index}`;
+            label.innerText = dato;
+            wrapper.appendChild(checkbox);
+            wrapper.appendChild(label);
+            container.appendChild(wrapper);
         });
     }
-    // Ya no necesitamos actualizarInputBusqueda porque todos se ven siempre
+    // --- NUEVO MÉTODO AUXILIAR PARA LEER SELECCIONADOS ---
+    obtenerSeleccionados(container) {
+        const checkboxes = container.querySelectorAll('input[type="checkbox"]:checked');
+        // Convertimos NodeList a Array de strings (los valores seleccionados)
+        return Array.from(checkboxes).map((cb) => cb.value);
+    }
     mostrarEquipos(listaFiltrada) {
-        var _a;
+        var _a, _b;
         this.divTabla.innerHTML = "";
         let equipos = listaFiltrada ? listaFiltrada : (_a = this.controlador) === null || _a === void 0 ? void 0 : _a.dtEquipos;
         if (!equipos)
             return;
         if (listaFiltrada) {
             this.btQuitarFiltro.style.display = "flex";
-            this.btBuscar.style.display = "flex"; // El profe dijo al lado del botón buscar      
+            this.btBuscar.style.display = "flex";
             this.btAgregar.style.display = "none";
         }
         else {
@@ -72,15 +97,12 @@ export default class Cl_vDCYT extends Cl_vGeneral {
             this.btBuscar.style.display = "flex";
             this.btAgregar.style.display = "flex";
         }
-        // Stats (recalculadas con la lista filtrada o total)
-        // NOTA: Si quieres que las stats reflejen SIEMPRE el total de la BD, usa this.controlador.dtEquipos
-        // Si quieres que reflejen lo filtrado, usa la variable 'equipos'.
-        // Usualmente se prefiere el total global.
-        let listaParaStats = equipos; // <-- USAMOS LA LISTA ACTUAL (FILTRADA O NO)
-        let total = listaParaStats.length;
-        let operativos = listaParaStats.filter(e => e.estado === "Operativo").length;
-        let reparacion = listaParaStats.filter(e => e.estado === "En Mantenimiento").length;
-        let danado = listaParaStats.filter(e => e.estado === "Dañado").length;
+        // Stats globales (siempre sobre el total real)
+        let totalReal = ((_b = this.controlador) === null || _b === void 0 ? void 0 : _b.dtEquipos) || [];
+        let total = totalReal.length;
+        let operativos = totalReal.filter((e) => e.estado === "Operativo").length;
+        let reparacion = totalReal.filter((e) => e.estado === "En Mantenimiento").length;
+        let danado = totalReal.filter((e) => e.estado === "Dañado").length;
         if (this.lblTotal)
             this.lblTotal.innerHTML = total.toString();
         if (this.lblOperativos)
@@ -127,72 +149,114 @@ export default class Cl_vDCYT extends Cl_vGeneral {
         });
     }
     abrirBusqueda() {
-        // Limpiar campos del modal
+        // Limpiamos Inputs de texto
         this.inBusSerial.value = "";
         this.inBusCpu.value = "";
         this.inBusRam.value = "";
         this.inBusFila.value = "";
         this.inBusPuesto.value = "";
-        this.slBusLab.value = "";
-        this.slBusEstado.value = "";
+        // CAMBIO: Limpiar checkboxes (desmarcarlos todos al abrir)
+        const checks = this.modalBuscar.querySelectorAll('input[type="checkbox"]');
+        checks.forEach((c) => (c.checked = false));
         this.modalBuscar.style.display = "flex";
     }
     ocultarBusqueda() {
         this.modalBuscar.style.display = "none";
     }
     limpiarFiltro() {
-        this.mostrarEquipos(); // Muestra todos (undefined)
+        this.mostrarEquipos(); // Muestra todos (pasando undefined)
     }
     ejecutarBusqueda() {
         var _a;
-        // 1. Obtener valores de los inputs
+        // 1. Obtener valores inputs texto
         let sSerial = this.inBusSerial.value.trim().toLowerCase();
-        let sLab = this.slBusLab.value; // Valor directo del select
         let sCpu = this.inBusCpu.value.trim().toLowerCase();
         let sRam = this.inBusRam.value.trim();
-        let sEstado = this.slBusEstado.value;
         let sFila = this.inBusFila.value.trim().toLowerCase();
         let sPuesto = this.inBusPuesto.value.trim().toLowerCase();
+        // 2. CAMBIO: Obtener Arrays de Checkboxes seleccionados
+        let sLabs = this.obtenerSeleccionados(this.divBusLab); // Ej: ["Lab-01", "Lab-03"]
+        let sEstados = this.obtenerSeleccionados(this.divBusEstado); // Ej: ["Dañado"]
         let todos = ((_a = this.controlador) === null || _a === void 0 ? void 0 : _a.dtEquipos) || [];
-        // 2. FILTRO MULTICAMPO (Lógica AND: Deben cumplirse todas las condiciones llenas)
+        // 3. LOGICA DE FILTRO ACTUALIZADA
         let filtrados = todos.filter((e) => {
             let coincide = true;
-            // Si el usuario escribió algo en Serial, verificamos. Si no, ignoramos este campo.
+            // Filtros de texto (igual que antes)
             if (sSerial && !e.serial.toLowerCase().includes(sSerial))
-                coincide = false;
-            if (sLab && e.lab !== sLab)
                 coincide = false;
             if (sCpu && !e.cpu.toLowerCase().includes(sCpu))
                 coincide = false;
-            // Para RAM comparamos valor exacto si se escribió algo
             if (sRam && String(e.ram) !== sRam)
-                coincide = false;
-            if (sEstado && e.estado !== sEstado)
                 coincide = false;
             if (sFila && e.fila.toLowerCase() !== sFila)
                 coincide = false;
             if (sPuesto && e.puesto.toLowerCase() !== sPuesto)
                 coincide = false;
+            // CAMBIO: Lógica Checkbox para Laboratorio
+            // Si el usuario seleccionó AL MENOS UN laboratorio, el equipo debe pertenecer a uno de ellos.
+            // Si no seleccionó ninguno (sLabs.length === 0), ignoramos el filtro (trae todos).
+            if (sLabs.length > 0 && !sLabs.includes(e.lab))
+                coincide = false;
+            // CAMBIO: Lógica Checkbox para Estado
+            if (sEstados.length > 0 && !sEstados.includes(e.estado))
+                coincide = false;
             return coincide;
         });
         this.ocultarBusqueda();
-        // 3. Mostrar resultados filtrados
+        // 4. Mostrar resultados filtrados
         this.mostrarEquipos(filtrados);
     }
-    addEquipo() { var _a; (_a = this.controlador) === null || _a === void 0 ? void 0 : _a.activarVista({ vista: "equipo", opcion: opcionFicha.add, }); }
-    consultarEquipo(serial) { var _a, _b; let equipo = (_a = this.controlador) === null || _a === void 0 ? void 0 : _a.equipo(serial); if (equipo)
-        (_b = this.controlador) === null || _b === void 0 ? void 0 : _b.activarVista({ vista: "equipo", opcion: opcionFicha.read, objeto: equipo, }); }
-    editarEquipo(serial) { var _a, _b; let equipo = (_a = this.controlador) === null || _a === void 0 ? void 0 : _a.equipo(serial); if (equipo)
-        (_b = this.controlador) === null || _b === void 0 ? void 0 : _b.activarVista({ vista: "equipo", opcion: opcionFicha.edit, objeto: equipo, }); }
-    pedirConfirmacion(serial) { this.serialPendiente = serial; this.modalEliminar.style.display = "flex"; }
-    ocultarModalBorrado() { this.serialPendiente = null; this.modalEliminar.style.display = "none"; }
-    ejecutarBorrado() { var _a; if (this.serialPendiente !== null) {
-        (_a = this.controlador) === null || _a === void 0 ? void 0 : _a.deleteEquipo({ serial: this.serialPendiente, callback: (error) => { this.ocultarModalBorrado(); if (error)
-                alert("Error: " + error);
-            else
-                this.mostrarEquipos(); }, });
-    } }
-    activarVista({ vista, opcion, objeto }) {
+    addEquipo() {
+        var _a;
+        (_a = this.controlador) === null || _a === void 0 ? void 0 : _a.activarVista({
+            vista: "equipo",
+            opcion: opcionFicha.add,
+        });
+    }
+    consultarEquipo(serial) {
+        var _a, _b;
+        let equipo = (_a = this.controlador) === null || _a === void 0 ? void 0 : _a.equipo(serial);
+        if (equipo)
+            (_b = this.controlador) === null || _b === void 0 ? void 0 : _b.activarVista({
+                vista: "equipo",
+                opcion: opcionFicha.read,
+                objeto: equipo,
+            });
+    }
+    editarEquipo(serial) {
+        var _a, _b;
+        let equipo = (_a = this.controlador) === null || _a === void 0 ? void 0 : _a.equipo(serial);
+        if (equipo)
+            (_b = this.controlador) === null || _b === void 0 ? void 0 : _b.activarVista({
+                vista: "equipo",
+                opcion: opcionFicha.edit,
+                objeto: equipo,
+            });
+    }
+    pedirConfirmacion(serial) {
+        this.serialPendiente = serial;
+        this.modalEliminar.style.display = "flex";
+    }
+    ocultarModalBorrado() {
+        this.serialPendiente = null;
+        this.modalEliminar.style.display = "none";
+    }
+    ejecutarBorrado() {
+        var _a;
+        if (this.serialPendiente !== null) {
+            (_a = this.controlador) === null || _a === void 0 ? void 0 : _a.deleteEquipo({
+                serial: this.serialPendiente,
+                callback: (error) => {
+                    this.ocultarModalBorrado();
+                    if (error)
+                        alert("Error: " + error);
+                    else
+                        this.mostrarEquipos();
+                },
+            });
+        }
+    }
+    activarVista({ vista, opcion, objeto, }) {
         if (vista === "dcyt") {
             this.show({ ver: true });
             this.mostrarEquipos();

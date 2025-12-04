@@ -5,21 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GESTION DE EQUIPOS DCYT-VISTA ADMINISTRADOR</title>
     <link rel="stylesheet" href="styles.css" />
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Título de la página y de la vista previa (WhatsApp) -->
-    <title>GESTION EQUIPOS DCYT-VISTA ADMINISTRADOR</title>
+    
     <meta property="og:title" content="GESTION EQUIPOS DCYT-VISTA ADMINISTRADOR" />
-    <!-- Descripción corta y atractiva -->
     <meta property="og:description" content="GESTION DE EQUIPOS UCLA-DCyT-VISTA ADMINISTRADOR " />
-    <!-- Imagen que se muestra en WhatsApp (logo o imagen destacada, 800x418 px recomendado) -->
     <meta property="og:image" content="https://gestion-de-equipos-dcyt-vista-admin.vercel.app/resource/logo.png" />
-    <!-- URL del proyecto -->
     <meta property="og:url" content="https://gestion-de-equipos-dcyt-vista-admin.vercel.app/" />
-    <!-- Tipo de contenido -->
     <meta property="og:type" content="website" />
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="./resource/favicon.png">
+
+
 </head>
 <body>
 
@@ -129,12 +123,22 @@
         <div class="modal-confirm-box" style="text-align: left; max-width: 350px;">
             <h3 style="margin-bottom: 15px;">Búsqueda Avanzada</h3>
             
-            <div style="max-height: 400px; overflow-y: auto; padding-right:5px;">
+            <div style="max-height: 450px; overflow-y: auto; padding-right:5px;">
                 <div class="form-group"><label>Serial:</label><input type="text" id="bus_inSerial"></div>
-                <div class="form-group"><label>Laboratorio:</label><select id="bus_slLab"></select></div>
+                
+                <div class="form-group">
+                    <label>Laboratorios (Selección Múltiple):</label>
+                    <div id="bus_divLab" class="checkbox-group"></div>
+                </div>
+
                 <div class="form-group"><label>CPU:</label><input type="text" id="bus_inCpu"></div>
                 <div class="form-group"><label>RAM:</label><input type="number" id="bus_inRam"></div>
-                <div class="form-group"><label>Estado:</label><select id="bus_slEstado"></select></div>
+                
+                <div class="form-group">
+                    <label>Estados (Selección Múltiple):</label>
+                    <div id="bus_divEstado" class="checkbox-group"></div>
+                </div>
+
                 <div class="row">
                     <div class="form-group half"><label>Fila:</label><input type="text" id="bus_inFila"></div>
                     <div class="form-group half"><label>Puesto:</label><input type="text" id="bus_inPuesto"></div>
@@ -149,6 +153,7 @@
     </div>
 
     <script type="module">
+        // Importación del módulo principal
         import Cl_index from "./dist/Cl_index.js";
         new Cl_index();
     </script>
